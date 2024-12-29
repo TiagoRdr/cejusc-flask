@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block conteudo %}
+<hr>
+
+<div class="containers">
+    <div class="card">
+        <div class="image-text">
+            <img src="../static/hammer.png" alt="Imagem 1">
+            <div class="text-container">
+                <p class="top-text">Total de Processos</p>
+                <p class="bottom-text">{{total_mensal}}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="image-text">
+            <img class="img_header" src="../static/agreement.png" alt="Imagem 2">
+            <div class="text-container">
+                <p class="top-text">Acordos Realizados</p>
+                <p class="bottom-text">{{total_clientes}} Clientes</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="image-text">
+            <img src="../static/disagreement.png" alt="Imagem 3">
+            <div class="text-container">
+                <p class="top-text">Sessões Canceladas</p>
+                <p class="bottom-text">R$ {{ticket_medio}}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="image-text">
+            <img src="../static/auction.png" alt="Imagem 3">
+            <div class="text-container">
+                <p class="top-text">Sessões Gratuitas</p>
+                <p class="bottom-text">R$ {{saldo_atual}}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br>
+
+<div class="container">        
+    <div class="row">
+        <div class="col-md-4">
+            <a class="nav-link" href="{{url_for('new_statistics')}}">
+                <button type="submit" class="btn btn-outline-primary text-black" value="NOVA VENDA" id="btn_nova_estatistica">
+                    <img class="img_menu" src="../static/analytics.png" alt="buttonpng">
+                    <p class="text-black">NOVA ESTATÍSTICA</p>
+                </button>  
+            </a>          
+        </div>  
+        <div class="col-md-4">
+            <a class="nav-link" href="{{url_for('menu')}}">         
+                <button type="submit" class="btn btn-outline-primary text-black" value="compras" id="btn_consulta_estatistica">
+                    <img class="img_menu" src="../static/statistics.png" alt="buttonpng">
+                    <p class="text-black">RELATÓRIOS</p>
+                </button> 
+            </a>         
+        </div>  
+        <div class="col-md-4">
+            <a class="nav-link" href="{{url_for('menu')}}">         
+                <button type="submit" class="btn btn-outline-primary text-black" value="CONSULTAS" id="btn_salario_minimo">
+                    <img class="img_menu" src="../static/wage.png" alt="buttonpng">
+                    <p class="text-black">SALÁRIO MÍNIMO</p>
+                </button> 
+            </a>         
+        </div>    
+    </div>
+</div>
+
+<br>
+<style>
+.containers {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.card {
+    background: linear-gradient(145deg, #eae7eb, #d1cbcc); /* Degradê suave */
+    border: 3px solid #5a6068; /* Cor da borda mais suave */
+    border-radius: 8px;
+    padding: 10px;
+    width: 30%;
+    transition: transform 0.3s; /* Animação de hover */
+}
+
+.card:hover {
+    transform: translateY(-5px); /* Levanta o card ao passar o mouse */
+}
+
+.image-text {
+    display: flex;
+    align-items: flex-start;
+}
+
+img {
+    width: 80px;
+    height: 80px;
+    margin-right: 15px;
+}
+
+.text-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.top-text {
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.bottom-text {
+    color: #555;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+#btn_nova_estatistica, #btn_salario_minimo,  #btn_consulta_estatistica {
+    background: linear-gradient(145deg, #eae7eb, #d1cbcc); /* Degradê suave */
+    border: none;
+    border-radius: 10px;
+    width: 100%; /* 100% da largura do coluna */
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.1s;
+    cursor: pointer;
+    text-align: center;
+    color: white;
+}
+
+.img_menu {
+    width: 100px;
+    height: 100px;
+    margin-top: 10px;
+}
+
+.btn p {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.btn:hover {
+    transform: scale(1.01); /* Efeito de hover */
+    color: white;
+}
+</style>
+
+{% endblock conteudo %}

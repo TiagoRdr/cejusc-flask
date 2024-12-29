@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <link rel="icon" type="image/x-icon" href="https://socialidiomas.com.br/main/wp-content/uploads/2020/01/Logo-CEJUSC-1024x908.png">
+    </head>
+    <body>
+        <div class="login-container">
+            <div class="logo-container">
+                <img class="img_logo_menu" src="https://socialidiomas.com.br/main/wp-content/uploads/2020/01/Logo-CEJUSC-1024x908.png" alt="logo">
+            </div>
+            <h1>Login</h1>
+            <form action="{{ url_for('login') }}" method="POST" id="loginForm">
+                <div class="form-group">
+                    <label for="username">Usuário</label>
+                    <input type="text" id="username" name="username" placeholder="Insira seu Usuário" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" name="password" placeholder="Insira sua Senha" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+        <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        {% if message and alert_type and redirect_url %}
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                position: "center",
+                icon: "{{ alert_type }}",
+                title: "{{ message }}",
+                showConfirmButton: false,
+                timer: 2000
+            });
+            setTimeout(() => {
+                window.location.href = "{{ redirect_url }}";
+            }, 3000);
+        });
+        </script>
+    {% endif %}
+        </script>
+    </body>
+    <style>
+        .logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+        .img_logo_menu {
+            height: 100px;
+            width: auto; /* Mantém a proporção da imagem */
+        }
+    </style>
+    </html>
