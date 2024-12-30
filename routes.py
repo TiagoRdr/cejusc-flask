@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, redirect, url_for, render_template
+from flask import Flask, request, jsonify, redirect, url_for, render_template, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash
 from sqlalchemy.orm import sessionmaker
@@ -8,7 +8,11 @@ from models.estatistica import EstatisticaMensal
 from sqlalchemy import and_, func, extract
 import datetime
 from sqlalchemy.sql.functions import coalesce
-from utils import date_format
+from utils import date_format, monetary_format, generate_session, monetary_format_str
+import pandas as pd
+
+
+app.secret_key = generate_session()
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -153,7 +157,7 @@ def reports():
 
 @app.route('/show-reports', methods=['GET', 'POST'])
 def show_reports():
-
+    ano_atual = datetime.datetime.today().year
     data_inicio = request.form['dataInicio']
     data_fim = request.form['dataFim']
     tipo_relatorio = request.form['tipoRelatorio']
@@ -201,7 +205,66 @@ def show_reports():
     else:
         titulo = 'Estatística Processual'
 
-    return render_template('show_reports_all.html', titulo=titulo, civil=civil, familia=familia, data_inicio=date_format(data_inicio), data_fim=date_format(data_fim))
+    return render_template('show_reports_all.html', titulo=titulo, civil=civil, familia=familia, data_inicio=date_format(data_inicio), data_fim=date_format(data_fim), ano_atual=ano_atual)
+
+
+@app.route('/minimal-wage', methods=["POST", "GET"])
+def minimal_wage():    
+    if request.method == "POST":
+        # Certifique-se de que está lendo os dados JSON
+        data = request.get_json()  
+        
+        # Verifique se os dados estão vindo corretamente
+        if data and 'salario_minimo' in data:
+            salario_minimo = monetary_format(data.get('salario_minimo'), ",", ".")
+            session['salario_minimo'] = salario_minimo
+            return jsonify({"message": "Salário mínimo recebido com sucesso", "salario_minimo": salario_minimo})
+        else:
+            return jsonify({"error": "Dados inválidos"}), 400
+    
+    else:
+        # Convertendo o salário mínimo para float, caso venha como string
+        salario_minimo = session.get('salario_minimo', None)
+
+        # Dicionário inicial com o salário mínimo e suas divisões
+        valores = {
+            "R$ " + monetary_format_str(salario_minimo, ".", ","): '100%',
+            "R$ " + monetary_format_str(round((salario_minimo / 3)), ".", ","): "1/3",
+            "R$ " + monetary_format_str(round((salario_minimo / 2)), ".", ","): "1/2"
+        }
+
+        # Preenchendo o dicionário com os valores de 10 a 2000, de 10 em 10
+        for i in range(10, 2010, 10):
+            valores['R$ ' + monetary_format_str(round(i, 2), ".", ",")] = str(monetary_format_str(round(i * 100 / salario_minimo, 2), ".", ",")) + "%"
+
+        # Separando as chaves e valores do dicionário para listas
+        valor = list(valores.keys())
+        porcentagem = list(valores.values())
+
+        # Garantir que o número de itens seja múltiplo de 29 para dividir em 7 colunas
+        while len(valor) < 203:  # Adiciona valores para completar a quantidade de linhas desejada
+            valor.append("")
+            porcentagem.append("")
+
+        # Criando o DataFrame com as colunas divididas conforme o original
+        list_salary = {
+            'VALOR': valor[0:29], "%%%%1": porcentagem[0:29],
+            'VALOR2': valor[29:58], "%%%%2": porcentagem[29:58],
+            'VALOR3': valor[58:87], "%%%%3": porcentagem[58:87],
+            'VALOR4': valor[87:116], "%%%%4": porcentagem[87:116],
+            'VALOR5': valor[116:145], "%%%%5": porcentagem[116:145],
+            'VALOR6': valor[145:174], "%%%%6": porcentagem[145:174],
+            'VALOR7': valor[174:203], "%%%%7": porcentagem[174:203]
+        }
+
+        df_salary = pd.DataFrame(list_salary)
+        df_salary = df_salary.rename(columns=lambda col: "Salário" if "VALOR" in col else ("Porcentagem" if "%%%%" in col else col))
+        
+        # Caminho para salvar a planilha
+        df_salary.to_excel("Salario.xlsx", index=False)
+
+        # Passando o DataFrame para o template como uma variável
+        return render_template('minimal_wage.html', df_salary=df_salary)
 
 
 if __name__ == "__main__":

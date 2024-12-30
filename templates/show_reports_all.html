@@ -13,15 +13,6 @@
         min-height: 100vh;
         background-color: #f4f4f4;
     }
-    .container {
-        width: 90%;
-        max-width: 1200px;
-        background: #fff;
-        color: #333;
-        border-radius: 10px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        overflow: hidden;
-    }
     .header {
         background-color: #4a90e2;
         padding: 20px;
@@ -177,8 +168,9 @@
         </tbody>
     </table>
     <div class="footer">
-        © 2024 Estatísticas CEJUSC | <button class="export-btn" onclick="exportarPDF()">Exportar para PDF</button>
+        © {{ano_atual}} Estatísticas CEJUSC | <button class="export-btn btn btn-success btn-lg" onclick="exportarPDF()">Exportar para PDF</button>
     </div>
+    <br><br>
 </div>
 
 <!-- Inclusão das bibliotecas na ordem correta -->
@@ -193,9 +185,7 @@
         // URL da imagem
         const imageUrl = "../static/Logo-CEJUSC-1024x908.png";
         
-        // Adiciona a imagem no topo da página (posição X, Y e tamanho)
-        doc.addImage(imageUrl, 'PNG', 90, 2, 25, 20);  // (imagem, formato, posX, posY, largura, altura)
-
+        
         // Texto que você quer centralizar
         const titulo = "{{titulo}} | Período de {{data_inicio}} até {{data_fim}}";
         
@@ -209,6 +199,8 @@
         // Adiciona o título centralizado
         doc.setFontSize(16);
         doc.setTextColor(0, 0, 0); // Cor do texto
+        // Adiciona a imagem no topo da página (posição X, Y e tamanho)
+        doc.addImage(imageUrl, 'PNG', 90, 2, 25, 20);  // (imagem, formato, posX, posY, largura, altura)
         doc.text(titulo, posicaoCentral, 30); // Posição centralizada no eixo X e 65 no eixo Y
 
         // Continue com o restante da geração do PDF (como a tabela)
