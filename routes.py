@@ -5,6 +5,10 @@ from sqlalchemy.orm import sessionmaker
 from app import app, db
 from models.users import Usuario
 from models.estatistica import EstatisticaMensal
+from sqlalchemy import and_, func, extract
+import datetime
+from sqlalchemy.sql.functions import coalesce
+from utils import date_format
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -16,8 +20,23 @@ def login():
         usuario = Usuario.query.filter_by(login=login, senha=senha).first()
         
         if usuario and senha:
-            # Login bem-sucedido
-            return render_template('menu.html')
+            mes = datetime.datetime.today().month
+            ano = datetime.datetime.today().year
+
+            # Buscar registros de um tipo específico de processo em uma data específica
+            total_processos = db.session.query(func.sum(EstatisticaMensal.total_audiencias_realizadas)).filter(extract('month', EstatisticaMensal.data) == mes, extract('year', EstatisticaMensal.data) == ano).scalar()
+
+            acordos_realizados = db.session.query(func.sum(EstatisticaMensal.total_acordos_obtidos)).filter(extract('month', EstatisticaMensal.data) == mes, extract('year', EstatisticaMensal.data) == ano).scalar()
+
+            sessoes_canceladas = db.session.query(func.sum(EstatisticaMensal.total_sessoes_canceladas)).filter(extract('month', EstatisticaMensal.data) == mes, extract('year', EstatisticaMensal.data) == ano).scalar()
+
+            sessoes_gratuitas = db.session.query(func.sum(EstatisticaMensal.total_sessoes_gratuitas)).filter(extract('month', EstatisticaMensal.data) == mes, extract('year', EstatisticaMensal.data) == ano).scalar()
+
+            return render_template('menu.html', 
+                                total_processos=total_processos, 
+                                acordos_realizados=acordos_realizados, 
+                                sessoes_canceladas=sessoes_canceladas,
+                                sessoes_gratuitas=sessoes_gratuitas)
         else:
             # Login falhou
             return render_template('login.html', 
@@ -30,7 +49,24 @@ def login():
 
 @app.route('/menu')
 def menu():
-    return render_template('menu.html')
+
+    mes = datetime.datetime.today().month
+    ano = datetime.datetime.today().year
+
+    # Buscar registros de um tipo específico de processo em uma data específica
+    total_processos = db.session.query(func.sum(EstatisticaMensal.total_audiencias_realizadas)).filter(extract('month', EstatisticaMensal.data) == mes, extract('year', EstatisticaMensal.data) == ano).scalar()
+
+    acordos_realizados = db.session.query(func.sum(EstatisticaMensal.total_acordos_obtidos)).filter(extract('month', EstatisticaMensal.data) == mes, extract('year', EstatisticaMensal.data) == ano).scalar()
+
+    sessoes_canceladas = db.session.query(func.sum(EstatisticaMensal.total_sessoes_canceladas)).filter(extract('month', EstatisticaMensal.data) == mes, extract('year', EstatisticaMensal.data) == ano).scalar()
+
+    sessoes_gratuitas = db.session.query(func.sum(EstatisticaMensal.total_sessoes_gratuitas)).filter(extract('month', EstatisticaMensal.data) == mes, extract('year', EstatisticaMensal.data) == ano).scalar()
+
+    return render_template('menu.html', 
+                        total_processos=total_processos, 
+                        acordos_realizados=acordos_realizados, 
+                        sessoes_canceladas=sessoes_canceladas,
+                        sessoes_gratuitas=sessoes_gratuitas)
 
 
 @app.route('/nova-estatistica')
@@ -108,6 +144,64 @@ def save_statistics():
         session.close()
 
         return render_template('new_statistic.html')
+
+
+@app.route('/reports')
+def reports():
+    return render_template('reports.html')
+
+
+@app.route('/show-reports', methods=['GET', 'POST'])
+def show_reports():
+
+    data_inicio = request.form['dataInicio']
+    data_fim = request.form['dataFim']
+    tipo_relatorio = request.form['tipoRelatorio']
+
+    campos_filtrar = ["total_acordos_obtidos",
+                        "total_sessoes_infrutiferas",
+                        "total_audiencias_realizadas",
+                        "total_audiencias_designadas",
+                        "total_ausencia_requerente",
+                        "total_ausencia_requerido",
+                        "total_ausencia_partes",
+                        "total_sessoes_canceladas",
+                        "total_sessoes_redesignadas",
+                        "total_sessoes_nao_realizadas",
+                        "total_sessoes_realizar",
+                        "pauta_dias",
+                        "total_jg_dativo",
+                        "total_jg_adv",
+                        "total_sessoes_gratuitas"]
+
+    tipo_processo_n = f'{tipo_relatorio[0:3]}'
+
+    processos = ['-Cível', '-Família']
+
+    civil = {}
+    familia = {}
+
+    for processo in processos:
+        for campo in campos_filtrar:
+            atributo = getattr(EstatisticaMensal, campo, None)
+            if processo == '-Cível':
+                total_valor_civil = db.session.query(coalesce(func.sum(atributo),0)).filter(EstatisticaMensal.data >= data_inicio, 
+                                                                                                        EstatisticaMensal.data <= data_fim,
+                                                                                                            EstatisticaMensal.tipo_processo == tipo_processo_n+processo).scalar()
+                civil[f'{campo}'] = total_valor_civil
+            else:
+                total_valor_familia = db.session.query(coalesce(func.sum(atributo),0)).filter(EstatisticaMensal.data >= data_inicio, 
+                                                                                                        EstatisticaMensal.data <= data_fim,
+                                                                                                            EstatisticaMensal.tipo_processo == tipo_processo_n+processo).scalar()
+                familia[f'{campo}'] = total_valor_familia
+    
+
+    if tipo_processo_n == 'Pré':
+        titulo = 'Estatística Pré-Processual'
+    else:
+        titulo = 'Estatística Processual'
+
+    return render_template('show_reports_all.html', titulo=titulo, civil=civil, familia=familia, data_inicio=date_format(data_inicio), data_fim=date_format(data_fim))
 
 
 if __name__ == "__main__":

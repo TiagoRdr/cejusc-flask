@@ -14,11 +14,11 @@
 </head>
 <body>
     <div class="container text-center mt-4">
-        <!-- Logo -->
-        <div class="logo-container">
+        <!-- Navbar -->
+
+        <a class="navbar-brand" href="{{url_for('menu')}}">
             <img class="img_logo_menu" src="https://socialidiomas.com.br/main/wp-content/uploads/2020/01/Logo-CEJUSC-1024x908.png" alt="logo">
-        </div>
-        <!-- <h2 class="system_title">Sistema de Gerenciamento de Estátisticas Processuais - CEJUSC</h2> -->
+        </a>
 
         <!-- Main Content -->
         <div class="content mt-4">
@@ -29,21 +29,28 @@
 </body>
 
 <style>
-/* Centraliza a imagem na div */
-.logo-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+/* Estilos gerais */
 
-.system_title{
-  font-weight: b;
-}
-
-/* Ajusta o tamanho da imagem */
 .img_logo_menu {
-    height: 100px;
-    width: auto; /* Mantém a proporção da imagem */
+    height: 100px; /* Ajuste o tamanho da imagem */
+    width: auto;
+    margin-left: 10px; /* Ajusta a posição da imagem */
+}
+
+
+/* Adicionando a imagem de fundo com opacidade */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('https://socialidiomas.com.br/main/wp-content/uploads/2020/01/Logo-CEJUSC-1024x908.png'); /* Substitua pela URL da sua imagem */
+    background-size: cover;
+    background-position: center;
+    opacity: 0.03; /* Define a opacidade de 50% */
+    z-index: -1; /* Coloca a imagem de fundo atrás do conteúdo */
 }
 </style>
 </html>

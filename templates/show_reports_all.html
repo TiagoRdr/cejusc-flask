@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f4f4f4;
+    }
+    .container {
+        width: 90%;
+        max-width: 1200px;
+        background: #fff;
+        color: #333;
+        border-radius: 10px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+    }
+    .header {
+        background-color: #4a90e2;
+        padding: 20px;
+        text-align: center;
+    }
+    .header h1 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        color: #fff;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 12px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+    th {
+        background-color: #4a90e2;
+        color: #fff;
+        font-weight: bold;
+    }
+    td:nth-child(4) {
+        font-weight: bold;
+        color: #000000;
+    }
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    tr:nth-child(odd) {
+        background-color: #fff;
+    }
+    .footer {
+        background: #4a90e2;
+        text-align: center;
+        padding: 10px;
+        color: #fff;
+    }
+    .footer a {
+        color: #ffd700;
+        text-decoration: none;
+        font-weight: bold;
+    }
+</style>
+
+<div class="container">
+    <div class="header">
+        <h1>{{titulo}} | {{data_inicio}} - {{data_fim}}</h1>
+    </div>
+    <table id="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Assunto</th>
+                <th>Cível</th>
+                <th>Família</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Total sessões à realizar</td>
+                <td>{{civil.total_sessoes_realizar}}</td>
+                <td>{{familia.total_sessoes_realizar}}</td>
+                <td>{{civil.total_sessoes_realizar + familia.total_sessoes_realizar}}</td>
+            </tr>
+            <tr>
+                <td>Pauta em dias</td>
+                <td>{{civil.pauta_dias}}</td>
+                <td>{{familia.pauta_dias}}</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Total acordo obtidos</td>
+                <td>{{civil.total_acordos_obtidos}}</td>
+                <td>{{familia.total_acordos_obtidos}}</td>
+                <td>{{civil.total_acordos_obtidos + familia.total_acordos_obtidos}}</td>
+            </tr>
+            <tr>
+                <td>Total sessões infrutíferas</td>
+                <td>{{civil.total_sessoes_infrutiferas}}</td>
+                <td>{{familia.total_sessoes_infrutiferas}}</td>
+                <td>{{civil.total_sessoes_infrutiferas + familia.total_sessoes_infrutiferas}}</td>
+            </tr>
+            <tr>
+                <td>Total audiências realizadas</td>
+                <td>{{civil.total_audiencias_realizadas}}</td>
+                <td>{{familia.total_audiencias_realizadas}}</td>
+                <td>{{civil.total_audiencias_realizadas + familia.total_audiencias_realizadas}}</td>
+            </tr>
+            <tr>
+                <td>Total audiências designadas</td>
+                <td>{{civil.total_audiencias_designadas}}</td>
+                <td>{{familia.total_audiencias_designadas}}</td>
+                <td>{{civil.total_audiencias_designadas + familia.total_audiencias_designadas}}</td>
+            </tr>
+            <tr>
+                <td>Total ausência do requerente</td>
+                <td>{{civil.total_ausencia_requerente}}</td>
+                <td>{{familia.total_ausencia_requerente}}</td>
+                <td>{{civil.total_ausencia_requerente + familia.total_ausencia_requerente}}</td>
+            </tr>
+            <tr>
+                <td>Total ausência do requerido</td>
+                <td>{{civil.total_ausencia_requerido}}</td>
+                <td>{{familia.total_ausencia_requerido}}</td>
+                <td>{{civil.total_ausencia_requerido + familia.total_ausencia_requerido}}</td>
+            </tr>
+            <tr>
+                <td>Total ausência das partes</td>
+                <td>{{civil.total_ausencia_partes}}</td>
+                <td>{{familia.total_ausencia_partes}}</td>
+                <td>{{civil.total_ausencia_partes + familia.total_ausencia_partes}}</td>
+            </tr>
+            <tr>
+                <td>Total sessões canceladas</td>
+                <td>{{civil.total_sessoes_canceladas}}</td>
+                <td>{{familia.total_sessoes_canceladas}}</td>
+                <td>{{civil.total_sessoes_canceladas + familia.total_sessoes_canceladas}}</td>
+            </tr>
+            <tr>
+                <td>Total sessões redesignadas</td>
+                <td>{{civil.total_sessoes_redesignadas}}</td>
+                <td>{{familia.total_sessoes_redesignadas}}</td>
+                <td>{{civil.total_sessoes_redesignadas + familia.total_sessoes_redesignadas}}</td>
+            </tr>
+            <tr>
+                <td>Total sessões não realizadas</td>
+                <td>{{civil.total_sessoes_nao_realizadas}}</td>
+                <td>{{familia.total_sessoes_nao_realizadas}}</td>
+                <td>{{civil.total_sessoes_nao_realizadas + familia.total_sessoes_nao_realizadas}}</td>
+            </tr>
+            <tr>
+                <td>Total JG Dativo</td>
+                <td>{{civil.total_jg_dativo}}</td>
+                <td>{{familia.total_jg_dativo}}</td>
+                <td>{{civil.total_jg_dativo + familia.total_jg_dativo}}</td>
+            </tr>
+            <tr>
+                <td>Total JG Adv</td>
+                <td>{{civil.total_jg_adv}}</td>
+                <td>{{familia.total_jg_adv}}</td>
+                <td>{{civil.total_jg_adv + familia.total_jg_adv}}</td>
+            </tr>
+            <tr>
+                <td>Total de sessões gratuitas</td>
+                <td>{{civil.total_sessoes_gratuitas}}</td>
+                <td>{{familia.total_sessoes_gratuitas}}</td>
+                <td>{{civil.total_sessoes_gratuitas + familia.total_sessoes_gratuitas}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="footer">
+        © 2024 Estatísticas CEJUSC | <button class="export-btn" onclick="exportarPDF()">Exportar para PDF</button>
+    </div>
+</div>
+
+<!-- Inclusão das bibliotecas na ordem correta -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.21/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+    function exportarPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // URL da imagem
+        const imageUrl = "../static/Logo-CEJUSC-1024x908.png";
+        
+        // Adiciona a imagem no topo da página (posição X, Y e tamanho)
+        doc.addImage(imageUrl, 'PNG', 90, 2, 25, 20);  // (imagem, formato, posX, posY, largura, altura)
+
+        // Texto que você quer centralizar
+        const titulo = "{{titulo}} | Período de {{data_inicio}} até {{data_fim}}";
+        
+        // Calcular a largura do texto
+        const larguraTexto = doc.getTextWidth(titulo);
+
+        // Calcular a posição central
+        const larguraPagina = doc.internal.pageSize.width;
+        const posicaoCentral = (larguraPagina - larguraTexto) / 2;
+
+        // Adiciona o título centralizado
+        doc.setFontSize(16);
+        doc.setTextColor(0, 0, 0); // Cor do texto
+        doc.text(titulo, posicaoCentral, 30); // Posição centralizada no eixo X e 65 no eixo Y
+
+        // Continue com o restante da geração do PDF (como a tabela)
+        const tabela = document.getElementById('tabela-relatorio');
+        doc.autoTable({
+            html: tabela,
+            startY: 40,  // Ajuste a posição Y da tabela para evitar sobreposição com o título
+            styles: {
+                font: "Roboto",
+                fontSize: 12,
+                cellPadding: 5,
+                halign: 'center',
+                valign: 'middle',
+                lineColor: [0, 0, 0],
+                lineWidth: 0.1,
+            },
+            headStyles: {
+                fillColor: [74, 144, 226],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+            },
+            bodyStyles: {
+                fillColor: [255, 255, 255],
+                textColor: [0, 0, 0],
+            },
+            alternateRowStyles: {
+                fillColor: [249, 249, 249],
+            },
+            columnStyles: {
+                0: { cellWidth: 'auto' },
+                1: { cellWidth: 'auto' },
+                2: { cellWidth: 'auto' },
+                3: { cellWidth: 'auto' },
+            }
+        });
+
+        // Salva o PDF
+        doc.save('{{titulo}} | {{data_inicio}} - {{data_fim}}.pdf');
+    }
+</script>
+
+
+{% endblock conteudo %}

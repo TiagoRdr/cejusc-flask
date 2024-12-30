@@ -8,7 +8,7 @@
             <img src="../static/hammer.png" alt="Imagem 1">
             <div class="text-container">
                 <p class="top-text">Total de Processos</p>
-                <p class="bottom-text">{{total_mensal}}</p>
+                <p class="bottom-text">{{total_processos}} Processos</p>
             </div>
         </div>
     </div>
@@ -18,7 +18,7 @@
             <img class="img_header" src="../static/agreement.png" alt="Imagem 2">
             <div class="text-container">
                 <p class="top-text">Acordos Realizados</p>
-                <p class="bottom-text">{{total_clientes}} Clientes</p>
+                <p class="bottom-text">{{acordos_realizados}} Acordos</p>
             </div>
         </div>
     </div>
@@ -28,7 +28,7 @@
             <img src="../static/disagreement.png" alt="Imagem 3">
             <div class="text-container">
                 <p class="top-text">Sessões Canceladas</p>
-                <p class="bottom-text">R$ {{ticket_medio}}</p>
+                <p class="bottom-text">{{sessoes_canceladas}} Sessões</p>
             </div>
         </div>
     </div>
@@ -38,7 +38,7 @@
             <img src="../static/auction.png" alt="Imagem 3">
             <div class="text-container">
                 <p class="top-text">Sessões Gratuitas</p>
-                <p class="bottom-text">R$ {{saldo_atual}}</p>
+                <p class="bottom-text">{{sessoes_gratuitas}} Sessões</p>
             </div>
         </div>
     </div>
@@ -57,7 +57,7 @@
             </a>          
         </div>  
         <div class="col-md-4">
-            <a class="nav-link" href="{{url_for('menu')}}">         
+            <a class="nav-link" href="{{url_for('reports')}}">         
                 <button type="submit" class="btn btn-outline-primary text-black" value="compras" id="btn_consulta_estatistica">
                     <img class="img_menu" src="../static/statistics.png" alt="buttonpng">
                     <p class="text-black">RELATÓRIOS</p>
