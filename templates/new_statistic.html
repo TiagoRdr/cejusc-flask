@@ -28,10 +28,6 @@
             </div>        
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="total_sessoes_realizar" class="form-label">Sessões a Realizar</label>
-                    <input type="number" id="total_sessoes_realizar" name="total_sessoes_realizar" class="form-control" required>
-                </div>
-                <div class="col-md-6 mb-3">
                     <label for="pauta_dias" class="form-label">Pauta em Dias</label>
                     <input type="number" id="pauta_dias" name="pauta_dias" class="form-control" required>
                 </div>
@@ -43,17 +39,17 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="total_acordos_obtidos" class="form-label">Total de Acordos Obtidos</label>
-                    <input type="number" id="total_acordos_obtidos" name="total_acordos_obtidos" class="form-control" onchange="updateTotals()" required>
+                    <input type="number" id="total_acordos_obtidos" name="total_acordos_obtidos" class="form-control" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="total_sessoes_infrutiferas" class="form-label">Total de Sessões Infrutíferas</label>
-                    <input type="number" id="total_sessoes_infrutiferas" name="total_sessoes_infrutiferas" class="form-control" onchange="updateTotals()" required>
+                    <input type="number" id="total_sessoes_infrutiferas" name="total_sessoes_infrutiferas" class="form-control" required>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="total_audiencias_designadas" class="form-label">Audiências Designadas</label>
-                    <input type="number" id="total_audiencias_designadas" name="total_audiencias_designadas" class="form-control" onchange="updateTotals()" required>
+                    <input type="number" id="total_audiencias_designadas" name="total_audiencias_designadas" class="form-control" required>
                 </div>
             </div>
             <br>
@@ -67,27 +63,27 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="total_ausencia_requerente" class="form-label">Ausência do Requerente</label>
-                    <input type="number" id="total_ausencia_requerente" name="total_ausencia_requerente" class="form-control" onchange="updateTotals()" required>
+                    <input type="number" id="total_ausencia_requerente" name="total_ausencia_requerente" class="form-control" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="total_ausencia_requerido" class="form-label">Ausência do Requerido</label>
-                    <input type="number" id="total_ausencia_requerido" name="total_ausencia_requerido" class="form-control" onchange="updateTotals()" required>
+                    <input type="number" id="total_ausencia_requerido" name="total_ausencia_requerido" class="form-control" required>
                 </div>
             </div>        
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="total_ausencia_partes" class="form-label">Ausência de Ambas as Partes</label>
-                    <input type="number" id="total_ausencia_partes" name="total_ausencia_partes" class="form-control" onchange="updateTotals()" required>
+                    <input type="number" id="total_ausencia_partes" name="total_ausencia_partes" class="form-control" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="total_sessoes_canceladas" class="form-label">Sessões Canceladas</label>
-                    <input type="number" id="total_sessoes_canceladas" name="total_sessoes_canceladas" class="form-control" onchange="updateTotals()" required>
+                    <input type="number" id="total_sessoes_canceladas" name="total_sessoes_canceladas" class="form-control" required>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="total_sessoes_redesignadas" class="form-label">Sessões Redesignadas</label>
-                    <input type="number" id="total_sessoes_redesignadas" name="total_sessoes_redesignadas" class="form-control" onchange="updateTotals()" required>
+                    <input type="number" id="total_sessoes_redesignadas" name="total_sessoes_redesignadas" class="form-control" required>
                 </div>
             </div>
         </div>
@@ -99,42 +95,52 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="total_jg_dativo" class="form-label">Juiz Dativo</label>
-                    <input type="number" id="total_jg_dativo" name="total_jg_dativo" class="form-control" onchange="updateTotals()" required>
+                    <input type="number" id="total_jg_dativo" name="total_jg_dativo" class="form-control" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="total_jg_adv" class="form-label">Juiz Advogado</label>
-                    <input type="number" id="total_jg_adv" name="total_jg_adv" class="form-control" onchange="updateTotals()" required>
+                    <input type="number" id="total_jg_adv" name="total_jg_adv" class="form-control" required>
                 </div>
             </div>        
         </div>
     </div>
 </div>
 <br><br>
-<button type="button" onclick="showAlert()" class="btn btn-success btn-lg">SALVAR ESTATÍSTICA</button>
+<button type="button" onclick="showAlert(event)" class="btn btn-success btn-lg">SALVAR ESTATÍSTICA</button>
 </form>
 
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function showAlert() {        
-        Swal.fire({
-            title: "Confirme a estatística",
-            icon: "info",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Confirmar"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({
-                    title: "Estatística Salva!",
-                    icon: "success"
-                }).then(() => {
-                    // Enviar o formulário após a confirmação
-                    document.getElementById("saveForm").submit();
-                });
-            }
-        });
+    function showAlert(event) {
+        // Previne o envio imediato do formulário
+        event.preventDefault();
+
+        // Verifica se o formulário é válido (todos os campos required preenchidos)
+        const form = document.getElementById("saveForm");
+        if (form.checkValidity()) {
+            Swal.fire({
+                title: "Confirme a estatística",
+                icon: "info",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Confirmar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: "Estatística Salva!",
+                        icon: "success"
+                    }).then(() => {
+                        // Envia o formulário após a confirmação
+                        form.submit();
+                    });
+                }
+            });
+        } else {
+            // Se o formulário não for válido, mostra a validação padrão do navegador
+            form.reportValidity();
+        }
     }
 </script>
 
