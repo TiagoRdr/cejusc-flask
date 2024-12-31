@@ -53,3 +53,14 @@ button {
 button:hover {
     background-color: #45a049;
 }
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+.img_logo_menu {
+    height: 100px;
+    width: auto; /* Mantém a proporção da imagem */
+}

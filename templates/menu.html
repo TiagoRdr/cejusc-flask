@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
+
 {% block conteudo %}
 <hr>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style_menu.css') }}">
 
 <div class="containers">
     <div class="card">
@@ -42,8 +44,6 @@
             </div>
         </div>
     </div>
-
-    
 </div>
 
 <br>
@@ -89,155 +89,7 @@
 </div>
 
 <br>
-<style>
-.containers {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-}
-
-.card {
-    background: linear-gradient(145deg, #eae7eb, #d1cbcc); /* Degradê suave */
-    border: 3px solid #5a6068; /* Cor da borda mais suave */
-    border-radius: 8px;
-    padding: 10px;
-    width: 30%;
-    transition: transform 0.3s; /* Animação de hover */
-}
-
-.card:hover {
-    transform: translateY(-5px); /* Levanta o card ao passar o mouse */
-}
-
-.image-text {
-    display: flex;
-    align-items: flex-start;
-}
-
-img {
-    width: 80px;
-    height: 80px;
-    margin-right: 15px;
-}
-
-.text-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-}
-
-.top-text {
-    font-weight: bold;
-    margin-bottom: 10px;
-    font-size: 18px;
-}
-
-.bottom-text {
-    color: #555;
-    font-size: 16px;
-    margin-bottom: 5px;
-}
-
-#btn_nova_estatistica, #btn_salario_minimo, #btn_relatorios, #btn_consulta_estatistica {
-    background: linear-gradient(145deg, #eae7eb, #d1cbcc); /* Degradê suave */
-    border: none;
-    border-radius: 10px;
-    width: 100%; /* 100% da largura da coluna */
-    height: 250px; /* Aumentando o tamanho dos botões */
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: 20px auto;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.1s;
-    cursor: pointer;
-    text-align: center;
-    color: white;
-}
-
-#btn_relatorios, #btn_consulta_estatistica {
-    margin-left: 20px; /* Adicionando distância para afastar os botões à direita */
-}
-
-.img_menu {
-    width: 150px;
-    height: 150px;
-    margin-top: 10px;
-}
-
-.btn p {
-    font-size: 25px;
-    font-weight: bold;
-}
-
-.btn:hover {
-    transform: scale(1.01); /* Efeito de hover */
-    color: white;
-}
-
-/* Ajustando a estrutura das colunas */
-.row {
-    display: flex;
-    justify-content: space-between;
-}
-
-.col-md-4 {
-    flex: 1;
-    margin-right: 15px;
-}
-
-/* Garantindo que o último botão à direita se alinhe à direita */
-.col-md-6 {
-    flex: 1;
-    margin-left: 15px;
-}
-
-</style>
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.getElementById('btn_salario_minimo').addEventListener('click', function() {
-    Swal.fire({
-        title: 'Insira o Salário Mínimo',
-        input: 'text',
-        inputLabel: 'Salário Mínimo Atual',
-        inputPlaceholder: 'Digite o valor...',
-        showCancelButton: true,
-        confirmButtonText: 'Confirmar',
-        cancelButtonText: 'Cancelar',
-        inputValidator: (value) => {
-            if (!value) {
-                return 'Por favor, insira um valor';
-            }
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Envia o valor para o backend
-            const salarioMinimo = result.value;
-
-            fetch('/minimal-wage', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',  // Certifique-se que está configurado como application/json
-                },
-                body: JSON.stringify({ salario_minimo: salarioMinimo }) // Certifique-se de que os dados estão em formato JSON
-            })
-            .then(response => {
-                if (response.ok) {
-                    // Se a requisição for bem-sucedida, redireciona para /minimal-wage
-                    window.location.href = '/minimal-wage';
-                } else {
-                    Swal.fire('Erro!', 'Houve um problema ao enviar os dados.', 'error');
-                }
-            })
-            .catch(error => {
-                Swal.fire('Erro!', 'Houve um problema ao enviar os dados.', 'error');
-            });
-        }
-    });
-});
-</script>
-
+<script src="{{ url_for('static', filename='js/script_menu.js') }}"></script>
 
 {% endblock conteudo %}

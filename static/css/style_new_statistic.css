@@ -1,0 +1,23 @@
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.container {
+    margin-top: 20px;
+}
+
+.border-left {
+    border-left: 1px solid #000;
+}
+
+.border-top {
+    border-top: 1px solid #000;
+}
+
+p.lead {
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}

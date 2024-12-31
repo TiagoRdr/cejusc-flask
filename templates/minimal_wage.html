@@ -1,213 +1,48 @@
 {% extends 'base.html' %}
 {% block conteudo %}
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 0;
-        }
+<div class="container">
+    <h2 class="display-5">TABELA DE SALÁRIO MÍNIMO</h2>
 
-        .container {            
-            max-width: 1700px;
-            margin: 0 auto;
-            text-align: center;
-        }
+    <!-- Botões para exportação -->
+    <div class="export-btn-container">
+        <button class="export-btn btn btn-success" id="export_excel">Exportar para Excel</button>
+        <button class="export-btn btn btn-primary" onclick="exportTableToPDF()">Exportar para PDF</button>
+    </div>
 
-        h2 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: #333;
-            font-weight: bold;
-        }
-
-        .btn {
-            font-size: 16px;
-            padding: 12px 20px;
-            margin: 10px;
-            border-radius: 25px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-success {
-            background-color: #28a745;
-            border: none;
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-        }
-
-        .btn:hover {
-            opacity: 0.8;
-            cursor: pointer;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 30px auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        th, td {
-            padding: 12px 20px;
-            text-align: center;
-            border: 1px solid #ddd;
-            font-size: 16px;
-        }
-
-        th {
-            background-color: #337c36;
-            color: white;
-            font-weight: bold;
-        }
-
-        td {
-            background-color: #fff;
-        }
-
-        tr:nth-child(even) td {
-            background-color: #f9f9f9;
-        }
-
-        tr:hover td {
-            background-color: #f1f1f1;
-        }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        /* Estilos para Salário e Porcentagem */
-        .salario {
-            background-color: #c0c9c2;
-            color: #000000;
-        }
-
-        .porcentagem {
-            background-color: #c0c9c2;
-            color: #000000;
-        }
-
-        /* Botões de exportação */
-        .export-btn-container {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 10px;
-        }
-    </style>
-
-    <div class="container">
-        <h2 class="display-5">TABELA DE SALÁRIO MÍNIMO</h2>
-        
-        <!-- Botões para exportação -->
-        <div class="export-btn-container">
-            <button class="export-btn btn btn-success" id="export_excel">Exportar para Excel</button>
-            <button class="export-btn btn btn-primary" onclick="exportTableToPDF()">Exportar para PDF</button>
-        </div>
-
-        <!-- Tabela -->
-        <div class="table-container">
-            <table id="tabela_salario">
-                <thead>
+    <!-- Tabela -->
+    <div class="table-container">
+        <table id="tabela_salario">
+            <thead>
+                <tr>
+                    {% for column in df_salary.columns %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in df_salary.iterrows() %}
                     <tr>
-                        {% for column in df_salary.columns %}
-                            <th>{{ column }}</th>
+                        {% for i in range(df_salary.columns|length) %}
+                            {% if df_salary.columns[i] == 'Salário' %}
+                                <td class="salario">{{ row[1][i] }}</td>
+                            {% elif df_salary.columns[i] == 'Porcentagem' %}
+                                <td class="porcentagem">{{ row[1][i] }}</td>
+                            {% else %}
+                                <td>{{ row[1][i] }}</td>
+                            {% endif %}
                         {% endfor %}
                     </tr>
-                </thead>
-                <tbody>
-                    {% for row in df_salary.iterrows() %}
-                        <tr>
-                            {% for i in range(df_salary.columns|length) %}
-                                {% if df_salary.columns[i] == 'Salário' %}
-                                    <td class="salario">{{ row[1][i] }}</td>
-                                {% elif df_salary.columns[i] == 'Porcentagem' %}
-                                    <td class="porcentagem">{{ row[1][i] }}</td>
-                                {% else %}
-                                    <td>{{ row[1][i] }}</td>
-                                {% endif %}
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</div>
+
+<!-- Importar CSS e JS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style_minimal_wage.css') }}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-<script>
-    // Função para ajustar a tabela dinamicamente caso necessário
-    window.addEventListener('resize', function () {
-        var table = document.querySelector('table');
-        if (window.innerWidth < 600) {
-            table.style.fontSize = '12px';
-        } else {
-            table.style.fontSize = '14px';
-        }
-    });
-
-    // Exportar tabela para Excel
-    document.getElementById('export_excel').addEventListener('click', function () {
-        const table = document.getElementById('tabela_salario');
-        const wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
-        XLSX.writeFile(wb, 'tabela_salario.xlsx');
-    });
-
-    async function exportTableToPDF() {
-    const { jsPDF } = window.jspdf; // Obtém jsPDF
-    const doc = new jsPDF();
-
-    // Adiciona a imagem no topo
-    const imgPath = "../static/Logo-CEJUSC-1024x908.png"; // Substitua pelo caminho da imagem
-    const imgX = 90; // Posição X da imagem
-    const imgY = 2; // Posição Y da imagem
-    const imgWidth = 28; // Largura da imagem
-    const imgHeight = 25; // Altura da imagem
-    const titleY = imgY + imgHeight + 10; // Posição Y do título
-
-    const tableContainer = document.getElementById("tabela_salario");
-
-    // Adiciona a imagem
-    const img = new Image();
-    img.src = imgPath;
-
-    img.onload = async function () {
-        doc.addImage(img, "PNG", imgX, imgY, imgWidth, imgHeight);
-
-        // Usa html2canvas para renderizar a tabela
-        await html2canvas(tableContainer).then((canvas) => {
-            const imgData = canvas.toDataURL("image/png"); // Converte para imagem
-            const tableImgWidth = 190; // Largura da imagem no PDF
-            const pageHeight = 295; // Altura de uma página A4
-            const tableImgHeight = (canvas.height * tableImgWidth) / canvas.width;
-
-            let heightLeft = tableImgHeight;
-            let position = titleY + 1;
-
-            // Adiciona a tabela como imagem ao PDF
-            doc.addImage(imgData, "PNG", 10, position, tableImgWidth, tableImgHeight);
-            heightLeft -= pageHeight;
-
-            // Adiciona páginas extras, se necessário
-            while (heightLeft >= 0) {
-                position = heightLeft - tableImgHeight;
-                doc.addPage();
-                doc.addImage(imgData, "PNG", 10, position, tableImgWidth, tableImgHeight);
-                heightLeft -= pageHeight;
-            }
-        });
-
-        // Baixa o PDF gerado
-        doc.save("tabela_salario.pdf");
-    };
-}
-</script>
+<script src="{{ url_for('static', filename='js/script_minimal_wage.js') }}"></script>
 
 {% endblock conteudo %}
