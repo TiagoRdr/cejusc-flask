@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block conteudo %}
+    <h1 class="display-5">CONSULTAR ESTATÍSTICAS</h1>
+    <hr>
+
+    <form action="{{url_for('filter_statistics')}}" method="POST" autocomplete="off" enctype="multipart/form-data" style="display: inline-block; width: 100%;">
+        <div style="display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 20px; border: 2px solid #ccc; border-radius: 8px; background-color: rgba(200, 200, 200, 0.3);">
+    
+            <!-- Campos de Data e Tipo de Processo na mesma linha -->
+            <div style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 15px; align-items: center;">
+    
+                <!-- Campo Data Inicial -->
+                <div style="text-align: center; width: 32%;">
+                    <label for="datainicio">Data Inicial</label><br>
+                    <input type="date" class="form-control" id="datainicio" name="datainicio" style="width: 100%;" value="{{datainicial}}" required>
+                </div>
+    
+                <!-- Campo Data Final -->
+                <div style="text-align: center; width: 32%;">
+                    <label for="datafim">Data Final</label><br>
+                    <input type="date" class="form-control" id="datafim" name="datafim" style="width: 100%;" value="{{datafinal}}" required>
+                </div>
+    
+                <!-- Campo Tipo de Processo -->
+                <div style="text-align: center; width: 32%;">
+                    <label for="tipo_processo" class="form-label">Tipo de Processo</label>
+                    <select id="tipo_processo" name="tipo_processo" class="form-select" style="width: 100%; margin-top: -8px;" required>
+                        <option value="" selected disabled>Selecione...</option>
+                        <option value="Pré-Cível">Pré-Cível</option>
+                        <option value="Pré-Família">Pré-Família</option>
+                        <option value="Pró-Cível">Pró-Cível</option>
+                        <option value="Pró-Família">Pró-Família</option>
+                        <option value="Todos">Todos</option>
+                    </select>
+                </div>
+    
+            </div>
+    
+            <!-- Botão abaixo dos campos -->
+            <div style="width: 150px; text-align: center; margin-top: 15px;">
+                <input type="submit" value="Consultar" class="btn btn-success" style="width: 100%; padding: 12px 0; border-radius: 5px; font-weight: bold;">
+            </div>
+    
+        </div>
+    </form>
+    
+
+
+
+
+<br>
+<hr>
+<div class="container">        
+    <div class="row">         
+        <div class="table-container"> 
+            <table class="table table-striped" id="tabela">
+                <thead>
+                    <tr>
+                    <th scope="col" class="coluna">Código da Estatística</th>
+                    <th scope="col">Data de Registro</th>
+                    <th scope="col">Tipo de Processo</th>
+                    <th scope="col">Visualizar/Remover</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in statistics_data %}                    
+                        <tr>
+                            <th scope="row">{{item['id']}}</th>
+                            <td>{{item['data']}}</td>
+                            <td>{{item['tipo_processo']}}</td>
+                            <td>
+                                <form action="{{url_for('view_statistics', id=item['id'])}}" method="POST" autocomplete="off" enctype="multipart/form-data" style="display:inline-block;">
+                                    <input type="hidden" name="codigo" id="codigo" value="{{ item['id'] }}">
+                                    <button type="submit" class="btn btn-info">Visualizar</button>
+                                </form>
+
+                                <form action="{{ url_for('remove_statistics', id=item['id']) }}" method="POST" autocomplete="off" enctype="multipart/form-data" style="display:inline-block;" id="remove_statistic_{{ item['id'] }}">
+                                    <input type="hidden" name="codigoremove" id="codigoremove" value="{{ item['id'] }}">
+                                    <button type="submit" class="btn btn-danger">Remover</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<br><br><br>
+
+<style>
+.table-container {
+    max-height: 700px; /* Ajuste conforme necessário */
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+th, td {
+    text-align: center; /* Alinha o texto horizontalmente ao centro */
+}
+
+tbody tr {
+  vertical-align: middle; /* Alinha o texto verticalmente ao centro */
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.querySelectorAll("form[id^='remove_statistic_']").forEach((form) => {
+    form.onsubmit = function (event) {
+        event.preventDefault();
+        const id = this.querySelector("#codigoremove").value;
+
+        Swal.fire({
+            title: "Confirme a exclusão da estatística",
+            text: "Não será possível reverter após a exclusão",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Remover",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/remove-statitics/${id}`, { method: "POST" })
+                    .then((response) => {
+                        if (response.ok) {
+                            Swal.fire({
+                                title: "Removido!",
+                                text: "A estatística foi removida com sucesso!",
+                                icon: "success",
+                                timer: 2000,
+                            });
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 3000);
+                        } else {
+                            Swal.fire({
+                                title: "Erro!",
+                                text: "Ocorreu um erro ao tentar remover a estatística.",
+                                icon: "error",
+                            });
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        Swal.fire({
+                            title: "Erro!",
+                            text: "Não foi possível remover a estatística.",
+                            icon: "error",
+                        });
+                    });
+            }
+        });
+    };
+});
+</script>
+{% endblock conteudo %}

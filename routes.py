@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from app import app, db
 from models.users import Usuario
 from models.estatistica import EstatisticaMensal
+from models.saldo import SaldoSessoesRealizar
 from sqlalchemy import and_, func, extract
 import datetime
 from sqlalchemy.sql.functions import coalesce
@@ -82,7 +83,7 @@ def new_statistics():
 def save_statistics():
     data = request.form['data']
     tipo_processo = request.form['tipo_processo']
-    total_sessoes_realizar = request.form['total_sessoes_realizar']
+    # total_sessoes_realizar = request.form['total_sessoes_realizar']
     pauta_dias = request.form['pauta_dias']
 
     total_acordos_obtidos = request.form['total_acordos_obtidos']
@@ -114,6 +115,8 @@ def save_statistics():
     estatistica_adicionada = EstatisticaMensal.query.filter_by(data=data, tipo_processo=tipo_processo).first()
 
     if estatistica_adicionada:
+        # registro_existente = session.query(EstatisticaMensal).get(estatistica_adicionada.id)
+        # return redirect(url_for('view_statistics, '))
         return render_template('new_statistic.html',
                                 message="Já existe uma Estatística adicionada neste dia com este Tipo de Processo. Deseja atualizar este registro?", 
                                 alert_type="warning",
@@ -132,7 +135,7 @@ def save_statistics():
         total_sessoes_canceladas=total_sessoes_canceladas,
         total_sessoes_redesignadas=total_sessoes_redesignadas,
         total_sessoes_nao_realizadas=total_sessoes_nao_realizadas,
-        total_sessoes_realizar=total_sessoes_realizar,
+        # total_sessoes_realizar=total_sessoes_realizar,
         pauta_dias=pauta_dias,
         total_jg_dativo=total_jg_dativo,
         total_jg_adv=total_jg_adv,
@@ -152,7 +155,8 @@ def save_statistics():
 
 @app.route('/reports')
 def reports():
-    return render_template('reports.html')
+    data_atual = datetime.date.today().strftime("%Y-%m-%d")
+    return render_template('reports.html', data_atual=data_atual)
 
 
 @app.route('/show-reports', methods=['GET', 'POST'])
@@ -162,7 +166,7 @@ def show_reports():
     data_fim = request.form['dataFim']
     tipo_relatorio = request.form['tipoRelatorio']
 
-    campos_filtrar = ["total_acordos_obtidos",
+    campos_filtrar_padrao = ["total_acordos_obtidos",
                         "total_sessoes_infrutiferas",
                         "total_audiencias_realizadas",
                         "total_audiencias_designadas",
@@ -172,8 +176,6 @@ def show_reports():
                         "total_sessoes_canceladas",
                         "total_sessoes_redesignadas",
                         "total_sessoes_nao_realizadas",
-                        "total_sessoes_realizar",
-                        "pauta_dias",
                         "total_jg_dativo",
                         "total_jg_adv",
                         "total_sessoes_gratuitas"]
@@ -186,7 +188,7 @@ def show_reports():
     familia = {}
 
     for processo in processos:
-        for campo in campos_filtrar:
+        for campo in campos_filtrar_padrao:
             atributo = getattr(EstatisticaMensal, campo, None)
             if processo == '-Cível':
                 total_valor_civil = db.session.query(coalesce(func.sum(atributo),0)).filter(EstatisticaMensal.data >= data_inicio, 
@@ -201,11 +203,112 @@ def show_reports():
     
 
     if tipo_processo_n == 'Pré':
-        titulo = 'Estatística Pré-Processual'
+        titulo = 'ESTATÍSTICA PRÉ-PROCESSUAL'
     else:
-        titulo = 'Estatística Processual'
+        titulo = 'ESTATÍSTICA PROCESSUAL'
 
-    return render_template('show_reports_all.html', titulo=titulo, civil=civil, familia=familia, data_inicio=date_format(data_inicio), data_fim=date_format(data_fim), ano_atual=ano_atual)
+
+
+    ############ Filtro da pauta e sessoes realizar ###########
+
+    campos_filtrar_diff = ["total_sessoes_realizar", "pauta_dias"]
+
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+
+    # Pega o saldo de novembro (o saldo inicial)
+    saldo_atual = session.query(SaldoSessoesRealizar).first()
+
+    saldo_atual_formatado = {
+        "mes": saldo_atual.mes,
+        "ano": saldo_atual.ano,
+        "pre_familia": saldo_atual.pre_familia,
+        "pre_civil": saldo_atual.pre_civil,
+        "pro_familia": saldo_atual.pro_familia,
+        "pro_civil": saldo_atual.pro_civil
+    }
+
+    # Inicializa os saldos acumulados com base no saldo de novembro
+    saldos_acumulados = {
+        'pre_familia': saldo_atual_formatado['pre_familia'],
+        'pre_civil': saldo_atual_formatado['pre_civil'],
+        'pro_familia': saldo_atual_formatado['pro_familia'],
+        'pro_civil': saldo_atual_formatado['pro_civil']
+    }
+
+    print(saldo_atual_formatado)
+
+    for processo in processos:
+        for campo in campos_filtrar_diff:
+            atributo = getattr(EstatisticaMensal, campo, None)
+
+            if campo == "pauta_dias":
+                if processo == '-Cível':
+                    total_pauta_dias = db.session.query(coalesce(func.max(atributo), 0)).filter(
+                        EstatisticaMensal.data >= data_inicio,
+                        EstatisticaMensal.data <= data_fim,
+                        EstatisticaMensal.tipo_processo == tipo_processo_n + processo).scalar()
+                    civil[f'{campo}'] = total_pauta_dias
+                else:
+                    total_pauta_dias = db.session.query(coalesce(func.max(atributo), 0)).filter(
+                        EstatisticaMensal.data >= data_inicio,
+                        EstatisticaMensal.data <= data_fim,
+                        EstatisticaMensal.tipo_processo == tipo_processo_n + processo).scalar()
+                    familia[f'{campo}'] = total_pauta_dias
+            else:
+                # # Sempre começa com o saldo de novembro (que é o saldo_atual_formatado['pre_civil'] ou ['pre_familia'])
+                # saldo_acumulado = saldos_acumulados['pre_civil'] if processo == '-Cível' else saldos_acumulados['pre_familia']
+
+                if tipo_processo_n+processo == "Pré-Cível":
+                    saldo_acumulado = saldos_acumulados['pre_civil']
+                elif tipo_processo_n+processo == "Pré-Família":
+                    saldo_acumulado = saldos_acumulados['pre_familia']
+                elif tipo_processo_n+processo == "Pró-Cível":
+                    saldo_acumulado = saldos_acumulados['pro_civil']
+                else:
+                    saldo_acumulado = saldos_acumulados['pro_familia']
+
+                
+                # Calcula o total de sessões para o processo em questão, somando a partir de novembro até o final do período
+                total_sessoes_realizar = db.session.query(
+                    coalesce(
+                        func.sum(
+                            (EstatisticaMensal.total_audiencias_designadas
+                            - EstatisticaMensal.total_audiencias_realizadas
+                            - EstatisticaMensal.total_sessoes_nao_realizadas)
+                        ), 0)
+                ).filter(
+                    EstatisticaMensal.tipo_processo == tipo_processo_n + processo,
+                    (func.extract('month', EstatisticaMensal.data) >= saldo_atual.mes) | (func.extract('year', EstatisticaMensal.data) >= saldo_atual.ano),  # Garante que as sessões de novembro de 2024 sejam incluídas
+                    EstatisticaMensal.data <= data_fim,     # Limita até a data final do relatório
+                    (func.extract('year', EstatisticaMensal.data) > saldo_atual.ano) | (
+                    (func.extract('year', EstatisticaMensal.data) == saldo_atual.ano) & 
+                    (func.extract('month', EstatisticaMensal.data) >= saldo_atual.mes))
+                ).scalar()
+
+                # Atualiza o saldo com base no somatório das sessões realizadas no período
+                saldo_atualizado = saldo_acumulado + total_sessoes_realizar
+
+                # Atualiza o dicionário com o saldo para o processo
+                if processo == '-Cível':
+                    civil[f'{campo}'] = saldo_atualizado
+                    saldos_acumulados['pre_civil'] = saldo_atualizado  # Atualiza o saldo acumulado
+                else:
+                    familia[f'{campo}'] = saldo_atualizado
+                    saldos_acumulados['pre_familia'] = saldo_atualizado  # Atualiza o saldo acumulado
+
+
+
+
+
+    return render_template('show_reports_all.html', 
+                        titulo=titulo, 
+                        civil=civil, 
+                        familia=familia, 
+                        data_inicio=date_format(data_inicio), 
+                        data_fim=date_format(data_fim), 
+                        ano_atual=ano_atual
+    )
 
 
 @app.route('/minimal-wage', methods=["POST", "GET"])
@@ -265,6 +368,210 @@ def minimal_wage():
 
         # Passando o DataFrame para o template como uma variável
         return render_template('minimal_wage.html', df_salary=df_salary)
+
+
+@app.route('/search-estatistics', methods=["POST", "GET"])
+def search_estatistics():
+    data_atual = datetime.date.today().strftime("%Y-%m-%d")
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+
+    estatisticas = session.query(EstatisticaMensal).limit(15).all()
+
+    # Converte os resultados para uma lista de dicionários
+    statistics_data = [
+        {
+            "id": item.id,
+            "data": item.data.strftime("%d/%m/%Y"), 
+            "tipo_processo": item.tipo_processo
+        }
+        for item in estatisticas
+    ]
+
+    return render_template('search_statistics.html', statistics_data=statistics_data, datainicial=data_atual, datafinal=data_atual)
+
+
+@app.route('/filter-statitics', methods=["POST", "GET"])
+def filter_statistics():    
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+
+
+    data_inicio = request.form['datainicio']
+    data_fim = request.form['datafim']
+    tipo_processo = request.form['tipo_processo']
+
+    if tipo_processo == 'Todos':
+        filtered_statistics = db.session.query(EstatisticaMensal).filter(
+        EstatisticaMensal.data >= data_inicio,
+        EstatisticaMensal.data <= data_fim
+        ).all()
+    else:
+        filtered_statistics = db.session.query(EstatisticaMensal).filter(
+        EstatisticaMensal.data >= data_inicio,
+        EstatisticaMensal.data <= data_fim,
+        EstatisticaMensal.tipo_processo == tipo_processo
+        ).all()
+
+    
+
+    # Converte os resultados para uma lista de dicionários
+    filtered_data = [
+        {
+            "id": item.id,
+            "data": item.data.strftime("%d/%m/%Y"),            
+            "tipo_processo": item.tipo_processo
+        }
+        for item in filtered_statistics
+    ]
+
+    print(filtered_data)
+
+    return render_template('search_statistics.html', statistics_data=filtered_data, datainicial=data_inicio, datafinal=data_fim) 
+
+
+@app.route('/remove-statitics/<int:id>', methods=["POST", "GET"])
+def remove_statistics(id):    
+    data_atual = datetime.date.today().strftime("%Y-%m-%d")
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+
+
+    register_delete = session.query(EstatisticaMensal).get(id)
+
+    if register_delete:
+        session.delete(register_delete)
+        session.commit()
+
+
+    estatisticas = session.query(EstatisticaMensal).limit(15).all()
+
+    # Converte os resultados para uma lista de dicionários
+    statistics_data = [
+        {
+            "id": item.id,
+            "data": item.data.strftime("%d/%m/%Y"), 
+            "tipo_processo": item.tipo_processo
+        }
+        for item in estatisticas
+    ]
+
+    return render_template('search_statistics.html', statistics_data=statistics_data, datainicial=data_atual, datafinal=data_atual) 
+
+
+
+@app.route('/view_statistic/<int:id>', methods=["POST", "GET"])
+def view_statistics(id):
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+
+    view_register = session.query(EstatisticaMensal).get(id)
+
+    statistics_data =  {
+        "id": view_register.id,
+        "data": view_register.data, 
+        "data_formatada": view_register.data.strftime("%d/%m/%Y"),
+        "tipo_processo": view_register.tipo_processo,
+        "total_acordos_obtidos": view_register.total_acordos_obtidos,
+        "total_sessoes_infrutiferas": view_register.total_sessoes_infrutiferas,
+        "total_audiencias_realizadas": view_register.total_audiencias_realizadas,
+        "total_audiencias_designadas": view_register.total_audiencias_designadas,
+        "total_ausencia_requerente": view_register.total_ausencia_requerente,
+        "total_ausencia_requerido": view_register.total_ausencia_requerido,
+        "total_ausencia_partes": view_register.total_ausencia_partes,
+        "total_sessoes_canceladas": view_register.total_sessoes_canceladas,
+        "total_sessoes_redesignadas": view_register.total_sessoes_redesignadas,
+        "total_sessoes_nao_realizadas": view_register.total_sessoes_nao_realizadas,
+        "total_sessoes_realizar": view_register.total_sessoes_realizar,
+        "pauta_dias": view_register.pauta_dias,
+        "total_jg_dativo": view_register.total_jg_dativo,
+        "total_jg_adv": view_register.total_jg_adv,
+        "total_sessoes_gratuitas": view_register.total_sessoes_gratuitas
+    }
+
+
+    return render_template('view_statistic.html', statistics_data=statistics_data) 
+
+
+
+@app.route('/update-statistic', methods=['POST'])
+def update_statistic():
+    # Obtendo os dados do formulário
+    id = request.form['id']
+    data = request.form['data']
+    tipo_processo = request.form['tipo_processo']
+    total_sessoes_realizar = request.form['total_sessoes_realizar']
+    pauta_dias = request.form['pauta_dias']
+    total_acordos_obtidos = request.form['total_acordos_obtidos']
+    total_sessoes_infrutiferas = request.form['total_sessoes_infrutiferas']
+    total_audiencias_designadas = request.form['total_audiencias_designadas']
+    total_ausencia_requerente = request.form['total_ausencia_requerente']
+    total_ausencia_requerido = request.form['total_ausencia_requerido']
+    total_ausencia_partes = request.form['total_ausencia_partes']
+    total_sessoes_canceladas = request.form['total_sessoes_canceladas']
+    total_sessoes_redesignadas = request.form['total_sessoes_redesignadas']
+    total_jg_dativo = request.form['total_jg_dativo']
+    total_jg_adv = request.form['total_jg_adv']
+    
+    # Calculando campos derivados
+    total_sessoes = int(total_sessoes_infrutiferas) + int(total_acordos_obtidos)
+    total_sessoes_nao_realizadas = (
+        int(total_ausencia_requerente) + int(total_ausencia_requerido) +
+        int(total_ausencia_partes) + int(total_sessoes_canceladas) +
+        int(total_sessoes_redesignadas)
+    )
+    total_sessoes_gratuitas = int(total_jg_adv) + int(total_jg_dativo)
+    
+    # Criando a sessão
+    Session = sessionmaker(bind=db.engine)
+    session = Session()
+
+    try:
+        # Localizando o registro pelo ID
+        updated_statistic = session.query(EstatisticaMensal).filter_by(id=id).first()
+
+        if not updated_statistic:
+            return {"error": "Estatística não encontrada"}, 404
+
+        # Atualizando os valores
+        updated_statistic.data = data
+        updated_statistic.tipo_processo = tipo_processo
+        updated_statistic.total_acordos_obtidos = total_acordos_obtidos
+        updated_statistic.total_sessoes_infrutiferas = total_sessoes_infrutiferas
+        updated_statistic.total_audiencias_realizadas = total_sessoes
+        updated_statistic.total_audiencias_designadas = total_audiencias_designadas
+        updated_statistic.total_ausencia_requerente = total_ausencia_requerente
+        updated_statistic.total_ausencia_requerido = total_ausencia_requerido
+        updated_statistic.total_ausencia_partes = total_ausencia_partes
+        updated_statistic.total_sessoes_canceladas = total_sessoes_canceladas
+        updated_statistic.total_sessoes_redesignadas = total_sessoes_redesignadas
+        updated_statistic.total_sessoes_nao_realizadas = total_sessoes_nao_realizadas
+        updated_statistic.total_sessoes_realizar = total_sessoes_realizar
+        updated_statistic.pauta_dias = pauta_dias
+        updated_statistic.total_jg_dativo = total_jg_dativo
+        updated_statistic.total_jg_adv = total_jg_adv
+        updated_statistic.total_sessoes_gratuitas = total_sessoes_gratuitas
+
+        # Salvando as alterações no banco de dados
+        session.commit()
+
+        return {"message": "Estatística atualizada com sucesso!"}, 200
+
+    except Exception as e:
+        session.rollback()
+        return {"error": str(e)}, 500
+
+    finally:
+        session.close()
+
+        # Adicionar o registro à sessão e commitar
+        session.add(updated_statistic)
+        session.commit()
+
+        # Fechar a sessão
+        session.close()
+
+        return redirect(url_for('search_estatistics'))
 
 
 if __name__ == "__main__":

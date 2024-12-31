@@ -42,6 +42,8 @@
             </div>
         </div>
     </div>
+
+    
 </div>
 
 <br>
@@ -51,24 +53,35 @@
         <div class="col-md-4">
             <a class="nav-link" href="{{url_for('new_statistics')}}">
                 <button type="submit" class="btn btn-outline-primary text-black" value="NOVA VENDA" id="btn_nova_estatistica">
-                    <img class="img_menu" src="../static/analytics.png" alt="buttonpng">
+                    <img class="img_menu" src="../static/checklist.png" alt="buttonpng">
                     <p class="text-black">NOVA ESTATÍSTICA</p>
                 </button>  
             </a>          
         </div>  
         <div class="col-md-4">
             <a class="nav-link" href="{{url_for('reports')}}">         
-                <button type="submit" class="btn btn-outline-primary text-black" value="compras" id="btn_consulta_estatistica">
-                    <img class="img_menu" src="../static/statistics.png" alt="buttonpng">
+                <button type="submit" class="btn btn-outline-primary text-black" value="compras" id="btn_relatorios">
+                    <img class="img_menu" src="../static/analysis.png" alt="buttonpng">
                     <p class="text-black">RELATÓRIOS</p>
                 </button> 
             </a>         
-        </div>  
+        </div>
+    </div>
+    <div class="row">
         <div class="col-md-4">
             <a class="nav-link">         
                 <button class="btn btn-outline-primary text-black" value="CONSULTAS" id="btn_salario_minimo">
                     <img class="img_menu" src="../static/wage.png" alt="buttonpng">
                     <p class="text-black">SALÁRIO MÍNIMO</p>
+                </button> 
+            </a>         
+        </div>    
+
+        <div class="col-md-4">
+            <a class="nav-link" href="{{url_for('search_estatistics')}}">         
+                <button class="btn btn-outline-primary text-black" value="CONSULTAS" id="btn_consulta_estatistica">
+                    <img class="img_menu" src="../static/statistics.png" alt="buttonpng">
+                    <p class="text-black">CONSULTAR ESTATÍSTICA</p>
                 </button> 
             </a>         
         </div>    
@@ -125,12 +138,12 @@ img {
     margin-bottom: 5px;
 }
 
-#btn_nova_estatistica, #btn_salario_minimo,  #btn_consulta_estatistica {
+#btn_nova_estatistica, #btn_salario_minimo, #btn_relatorios, #btn_consulta_estatistica {
     background: linear-gradient(145deg, #eae7eb, #d1cbcc); /* Degradê suave */
     border: none;
     border-radius: 10px;
-    width: 100%; /* 100% da largura do coluna */
-    height: 200px;
+    width: 100%; /* 100% da largura da coluna */
+    height: 250px; /* Aumentando o tamanho dos botões */
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -143,14 +156,18 @@ img {
     color: white;
 }
 
+#btn_relatorios, #btn_consulta_estatistica {
+    margin-left: 20px; /* Adicionando distância para afastar os botões à direita */
+}
+
 .img_menu {
-    width: 100px;
-    height: 100px;
+    width: 150px;
+    height: 150px;
     margin-top: 10px;
 }
 
 .btn p {
-    font-size: 20px;
+    font-size: 25px;
     font-weight: bold;
 }
 
@@ -158,6 +175,24 @@ img {
     transform: scale(1.01); /* Efeito de hover */
     color: white;
 }
+
+/* Ajustando a estrutura das colunas */
+.row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.col-md-4 {
+    flex: 1;
+    margin-right: 15px;
+}
+
+/* Garantindo que o último botão à direita se alinhe à direita */
+.col-md-6 {
+    flex: 1;
+    margin-left: 15px;
+}
+
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
